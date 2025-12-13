@@ -1,28 +1,31 @@
 <template>
   <nav 
     :class="[
-      'p-4 h-16 w-full fixed top-0 left-0 z-50 transition-all duration-700',
-      isDark ? 'bg-gray-900' : 'bg-white'
+      'px-8 h-16 fixed left-1/2 -translate-x-1/2 transition-all duration-700 rounded-full border',
+      isDark 
+        ? 'top-4 z-40 bg-black backdrop-blur-md border-gray-700 shadow-[0_0_50px_rgba(0,0,0,0.8)]' 
+        : 'top-4 z-40 bg-white/80 backdrop-blur-sm border-gray-200 shadow-sm'
     ]"
+    :style="isDark ? 'width: 570px; padding: 0 2.5rem;' : 'width: 542px;'"
   >
-    <div class="max-w-[1200px] mx-auto flex justify-between items-center">
+    <div class="h-full flex justify-between items-center">
       <div 
         :class="[
-          'text-xl font-bold font-epilogue transition-colors duration-700',
+          'text-xl font-bold tracking-wider transition-all duration-700',
           isDark ? 'text-white' : 'text-black'
         ]"
       >
         HIMETH
       </div>
-      <div class="space-x-8">
+      <div class="flex items-center gap-8">
         <a 
           v-for="link in navLinks" 
           :key="link.to" 
           :href="link.to" 
           :target="link.isExternal ? '_blank' : '_self'"
           :class="[
-            'transition duration-300 font-epilogue text-base',
-            isDark ? 'text-gray-300 hover:text-purple-400' : 'text-black hover:text-pink-800'
+            'text-sm font-medium transition-colors duration-300',
+            isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-black'
           ]"
         >
           {{ link.label }}
@@ -45,8 +48,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const defaultLinks: NavLink[] = [
-  { label: 'LinkedIn', to: 'https://linkedin.com', isExternal: true },
-  { label: 'GitHub', to: 'https://github.com', isExternal: true },
+  { label: 'LinkedIn', to: 'https://www.linkedin.com/in/himeth-peiris-1ab2232b3/', isExternal: true },
+  { label: 'GitHub', to: 'https://github.com/HBPeiris', isExternal: true },
   { label: 'Contact', to: 'mailto:himeth@example.com' }
 ];
 

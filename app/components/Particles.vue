@@ -1,134 +1,282 @@
-<template>
-  <div>
-    <!-- Navigation Bar -->
-    <NavBar :links="myNavLinks" :is-dark="isAboutMode" />
-
-    <!-- Main Content Area -->
-    <main 
-      :class="[
-        'relative w-full min-h-screen overflow-hidden transition-all duration-700 ease-[cubic-bezier(.405,0,.025,1)] pt-16',
-        isAboutMode 
-          ? 'bg-black' 
-          : 'bg-gradient-to-br from-purple-50 to-pink-50'
-      ]"
-    >
-      <!-- Particles Background - Only show when in About mode -->
-      <Transition name="fade">
-        <div 
-          v-if="showParticles && isAboutMode" 
-          class="fixed inset-0 pointer-events-none"
-          style="z-index: 0;"
-        >
-          <Particles
-            :particle-count="300"
-            :particle-spread="15"
-            :speed="0.15"
-            :particle-colors="['#8b5cf6', '#ec4899', '#3b82f6', '#ffffff']"
-            :move-particles-on-hover="false"
-            :alpha-particles="true"
-            :particle-base-size="80"
-            :size-randomness="1.5"
-            :camera-distance="20"
-            :disable-rotation="false"
-          />
-        </div>
-      </Transition>
-
-      <!-- Fixed Layout Container -->
-      <div class="h-screen flex items-center justify-center p-8 relative" style="z-index: 1;">
-        <div class="max-w-6xl w-full flex flex-col lg:flex-row items-center justify-between gap-16">
-          
-          <!-- Left: Text Content (Changes based on mode) -->
-          <HomeView v-if="!isAboutMode" />
-          <AboutView v-else />
-          
-          <!-- Right: Tilted Card (Stays in same position) -->
-          <div>
-            <TiltedCover
-              direction="right"
-              :is-flipped="isAboutMode"
-              @click="toggleMode"
-            > 
-              <template #cover>
-                <div 
-                  class="relative h-full w-full flex items-center justify-center bg-white"
-                  @mouseenter="handleVideoHover(true)"
-                  @mouseleave="handleVideoHover(false)"
-                >
-                  <video
-                    ref="videoElement"
-                    :src="logoVideo"
-                    class="h-full w-full object-contain"
-                    muted
-                    loop
-                    playsinline
-                  />
-                </div>
-              </template>
-              
-              <template #background>
-                <div class="relative h-full w-full">
-                  <img
-                    :src="profile"
-                    alt="Himeth Peiris"
-                    class="h-full w-full object-cover"
-                  />
-                </div>
-              </template>
-            </TiltedCover>
-          </div>
-          
-        </div>
-      </div>
-    </main>
-  </div>
-</template>
-
 <script setup lang="ts">
-import type { NavLink } from '@/types/nav';
-import Particles from '~/components/Particles.vue';
-import logoVideo from '../assets/HIMTH PEIRIS.mp4';
-import profile from '../assets/profile.png';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { Renderer, Camera, Geometry, Program, Mesh } from 'ogl';
 
-const isAboutMode = ref(false);
-const showParticles = ref(false);
-const videoElement = ref<HTMLVideoElement | null>(null);
+interface ParticlesProps {
+  particleCount?: number;
+  particleSpread?: number;
+  speed?: number;
+  particleColors?: string[];
+  moveParticlesOnHover?: boolean;
+  particleHoverFactor?: number;
+  alphaParticles?: boolean;
+  particleBaseSize?: number;
+  sizeRandomness?: number;
+  cameraDistance?: number;
+  disableRotation?: boolean;
+}
 
-const myNavLinks: NavLink[] = [
-  { label: 'LinkedIn', to: 'https://linkedin.com', isExternal: true },
-  { label: 'GitHub', to: 'https://github.com', isExternal: true },
-  { label: 'Contact', to: 'mailto:himeth@example.com' }
-];
+const props = withDefaults(defineProps<ParticlesProps>(), {
+  particleCount: 200,
+  particleSpread: 10,
+  speed: 0.1,
+  particleColors: () => ['#ffffff'],
+  moveParticlesOnHover: false,
+  particleHoverFactor: 1,
+  alphaParticles: false,
+  particleBaseSize: 100,
+  sizeRandomness: 1,
+  cameraDistance: 20,
+  disableRotation: false
+});
 
-const toggleMode = () => {
-  isAboutMode.value = !isAboutMode.value;
+const containerRef = ref<HTMLDivElement>();
+const mouseRef = ref({ x: 0, y: 0 });
+
+let renderer: Renderer | null = null;
+let camera: Camera | null = null;
+let particles: Mesh | null = null;
+let program: Program | null = null;
+let animationFrameId: number | null = null;
+let lastTime = 0;
+let elapsed = 0;
+
+const defaultColors = ['#ffffff'];
+
+const hexToRgb = (hex: string): [number, number, number] => {
+  hex = hex.replace(/^#/, '');
+  if (hex.length === 3) {
+    hex = hex
+      .split('')
+      .map(c => c + c)
+      .join('');
+  }
+  const int = parseInt(hex, 16);
+  const r = ((int >> 16) & 255) / 255;
+  const g = ((int >> 8) & 255) / 255;
+  const b = (int & 255) / 255;
+  return [r, g, b];
 };
 
-const handleVideoHover = (isHovering: boolean) => {
-  if (videoElement.value) {
-    if (isHovering) {
-      videoElement.value.play();
+const vertex = /* glsl */ `
+  attribute vec3 position;
+  attribute vec4 random;
+  attribute vec3 color;
+  
+  uniform mat4 modelMatrix;
+  uniform mat4 viewMatrix;
+  uniform mat4 projectionMatrix;
+  uniform float uTime;
+  uniform float uSpread;
+  uniform float uBaseSize;
+  uniform float uSizeRandomness;
+  
+  varying vec4 vRandom;
+  varying vec3 vColor;
+  
+  void main() {
+    vRandom = random;
+    vColor = color;
+    
+    vec3 pos = position * uSpread;
+    pos.z *= 10.0;
+    
+    vec4 mPos = modelMatrix * vec4(pos, 1.0);
+    float t = uTime;
+    mPos.x += sin(t * random.z + 6.28 * random.w) * mix(0.1, 1.5, random.x);
+    mPos.y += sin(t * random.y + 6.28 * random.x) * mix(0.1, 1.5, random.w);
+    mPos.z += sin(t * random.w + 6.28 * random.y) * mix(0.1, 1.5, random.z);
+    
+    vec4 mvPos = viewMatrix * mPos;
+    gl_PointSize = (uBaseSize * (1.0 + uSizeRandomness * (random.x - 0.5))) / length(mvPos.xyz);
+    gl_Position = projectionMatrix * mvPos;
+  }
+`;
+
+const fragment = /* glsl */ `
+  precision highp float;
+  
+  uniform float uTime;
+  uniform float uAlphaParticles;
+  varying vec4 vRandom;
+  varying vec3 vColor;
+  
+  void main() {
+    vec2 uv = gl_PointCoord.xy;
+    float d = length(uv - vec2(0.5));
+    
+    if(uAlphaParticles < 0.5) {
+      if(d > 0.5) {
+        discard;
+      }
+      gl_FragColor = vec4(vColor + 0.2 * sin(uv.yxx + uTime + vRandom.y * 6.28), 1.0);
     } else {
-      videoElement.value.pause();
-      videoElement.value.currentTime = 0;
+      float circle = smoothstep(0.5, 0.4, d) * 0.8;
+      gl_FragColor = vec4(vColor + 0.2 * sin(uv.yxx + uTime + vRandom.y * 6.28), circle);
     }
   }
+`;
+
+const handleMouseMove = (e: MouseEvent) => {
+  const container = containerRef.value;
+  if (!container) return;
+
+  const rect = container.getBoundingClientRect();
+  const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+  mouseRef.value = { x, y };
 };
 
-// Only mount Particles on client side
+const initParticles = () => {
+  const container = containerRef.value;
+  if (!container) return;
+
+  renderer = new Renderer({ depth: false, alpha: true });
+  const gl = renderer.gl;
+  gl.clearColor(0, 0, 0, 0);
+
+  camera = new Camera(gl, { fov: 15 });
+  camera.position.set(0, 0, props.cameraDistance);
+
+  const resize = () => {
+    if (!container || !renderer || !camera) return;
+    renderer.setSize(container.offsetWidth, container.offsetHeight);
+    camera.perspective({ aspect: container.offsetWidth / container.offsetHeight });
+  };
+  window.addEventListener('resize', resize, false);
+  resize();
+
+  if (props.moveParticlesOnHover) {
+    container.addEventListener('mousemove', handleMouseMove);
+  }
+
+  const count = props.particleCount;
+  const positions = new Float32Array(count * 3);
+  const randoms = new Float32Array(count * 4);
+  const colors = new Float32Array(count * 3);
+  
+  // FIX: Ensure palette is always an array of strings
+  const palette: string[] = (props.particleColors && props.particleColors.length > 0) 
+    ? props.particleColors 
+    : defaultColors;
+
+  for (let i = 0; i < count; i++) {
+    let x: number, y: number, z: number, len: number;
+    do {
+      x = Math.random() * 2 - 1;
+      y = Math.random() * 2 - 1;
+      z = Math.random() * 2 - 1;
+      len = x * x + y * y + z * z;
+    } while (len > 1 || len === 0);
+    const r = Math.cbrt(Math.random());
+    positions.set([x * r, y * r, z * r], i * 3);
+    randoms.set([Math.random(), Math.random(), Math.random(), Math.random()], i * 4);
+    
+    // FIX: Ensure we always get a valid color string
+    const colorIndex = Math.floor(Math.random() * palette.length);
+    const colorHex = palette[colorIndex] || '#ffffff';
+    const col = hexToRgb(colorHex);
+    colors.set(col, i * 3);
+  }
+
+  const geometry = new Geometry(gl, {
+    position: { size: 3, data: positions },
+    random: { size: 4, data: randoms },
+    color: { size: 3, data: colors }
+  });
+
+  program = new Program(gl, {
+    vertex,
+    fragment,
+    uniforms: {
+      uTime: { value: 0 },
+      uSpread: { value: props.particleSpread },
+      uBaseSize: { value: props.particleBaseSize },
+      uSizeRandomness: { value: props.sizeRandomness },
+      uAlphaParticles: { value: props.alphaParticles ? 1 : 0 }
+    },
+    transparent: true,
+    depthTest: false
+  });
+
+  particles = new Mesh(gl, { mode: gl.POINTS, geometry, program });
+
+  lastTime = performance.now();
+  elapsed = 0;
+
+  const update = (t: number) => {
+    animationFrameId = requestAnimationFrame(update);
+    const delta = t - lastTime;
+    lastTime = t;
+    elapsed += delta * props.speed;
+
+    if (program) {
+      program.uniforms.uTime.value = elapsed * 0.001;
+    }
+
+    if (particles) {
+      if (props.moveParticlesOnHover) {
+        particles.position.x = -mouseRef.value.x * props.particleHoverFactor;
+        particles.position.y = -mouseRef.value.y * props.particleHoverFactor;
+      }
+
+      if (!props.disableRotation) {
+        particles.rotation.x = Math.sin(elapsed * 0.0002) * 0.1;
+        particles.rotation.y = Math.cos(elapsed * 0.0005) * 0.15;
+        particles.rotation.z += 0.01 * props.speed;
+      }
+    }
+
+    if (renderer && camera && particles) {
+      renderer.render({ scene: particles, camera });
+    }
+  };
+
+  animationFrameId = requestAnimationFrame(update);
+  container.appendChild(gl.canvas);
+
+  return () => {
+    window.removeEventListener('resize', resize);
+    if (props.moveParticlesOnHover && container) {
+      container.removeEventListener('mousemove', handleMouseMove);
+    }
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
+    if (container && gl.canvas && container.contains(gl.canvas)) {
+      container.removeChild(gl.canvas);
+    }
+  };
+};
+
+const cleanup = () => {
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+  if (renderer) {
+    const gl = renderer.gl;
+    if (gl.canvas.parentNode) {
+      gl.canvas.parentNode.removeChild(gl.canvas);
+    }
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+  }
+  renderer = null;
+  camera = null;
+  particles = null;
+  program = null;
+};
+
 onMounted(() => {
-  showParticles.value = true;
+  initParticles();
+});
+
+onUnmounted(() => {
+  cleanup();
 });
 </script>
 
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.7s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
+<template>
+  <div ref="containerRef" class="absolute top-0 left-0 w-full h-full"></div>
+</template>

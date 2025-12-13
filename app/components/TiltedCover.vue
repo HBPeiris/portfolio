@@ -1,7 +1,7 @@
 <template>
-  <div class="flex h-96 w-80 items-center justify-center overflow-visible">
+  <div class="flex h-[500px] w-96 items-center justify-center overflow-visible">
     <div 
-      class="relative h-80 w-64 cursor-pointer transition-transform duration-300 hover:scale-105"
+      class="relative h-[450px] w-80 cursor-pointer transition-transform duration-300 hover:scale-105"
       @click="$emit('click')"
     >
       
@@ -38,7 +38,7 @@
             ? `perspective(400px) rotateY(${factor * 180}deg)` 
             : `perspective(400px) rotateY(${factor * 20}deg)`,
           opacity: isFlipped ? 0 : 1,
-          pointerEvents: 'none'
+          pointerEvents: isFlipped ? 'none' : 'auto'
         }"
       >
         <slot name="cover">
