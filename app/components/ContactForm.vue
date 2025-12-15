@@ -58,6 +58,7 @@
 
 <script>
 import emailjs from '@emailjs/browser';
+import { emailjsConfig } from '~/config/emailjs';
 
 export default {
   name: 'ContactForm',
@@ -80,14 +81,14 @@ export default {
 
       try {
         const result = await emailjs.send(
-          'service_8z6dlb6',
-          'template_octor7d',
+          emailjsConfig.serviceId,
+          emailjsConfig.templateId,
           {
             from_name: this.form.name,
             from_email: this.form.email,
             message: this.form.message
           },
-          '2hYfX8JotvRL2dhW2'
+          emailjsConfig.publicKey
         );
 
         this.statusMessage = 'Message sent successfully!';
