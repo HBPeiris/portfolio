@@ -68,7 +68,7 @@ const props = withDefaults(defineProps<Props>(), {
   isTilted: false,
   tiltDirection: 'left',
   autoplay: false,
-  autoplaySpeed: 0.5,
+  autoplaySpeed: 1.5,
   autoplayDirection: 'down',
   pauseOnHover: false
 });

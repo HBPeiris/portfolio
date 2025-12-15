@@ -128,7 +128,7 @@
             :is-tilted="true"
             tilt-direction="left"
             :autoplay="true"
-            :autoplay-speed="1.2"
+            :autoplay-speed="2.0"
             autoplay-direction="down"
             :pause-on-hover="true"
             negative-margin="-1em"
@@ -150,6 +150,17 @@
         <FlowingMenu :items="skillItems" />
       </div>
     </section>
+
+    <!-- Contact Section -->
+    <section class="relative w-full min-h-screen bg-black py-20 flex items-center justify-center">
+      <div class="w-full">
+        <ContactForm />
+      </div>
+    </section>
+    
+   
+         <Footer/>
+    
   </div>
 </template>
 
@@ -163,8 +174,10 @@ import HomeView from '@/components/HomeView.vue';
 import AboutView from '@/components/AboutView.vue';
 import TiltedCover from '@/components/TiltedCover.vue';
 import NavBar from '@/components/NavBar.vue';
+import ContactForm from '@/components/ContactForm.vue';
 import logoVideo from '../assets/HIMTH PEIRIS.mp4';
 import profile from '../assets/profile.png';
+import Footer from '@/components/Footer.vue';
 
 const isAboutMode = ref(false);
 const isScrolledPastHero = ref(false);
