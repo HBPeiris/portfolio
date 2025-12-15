@@ -1,0 +1,14 @@
+[build]
+  command = "npm run generate"
+  publish = ".output/public"
+
+[[redirects]]
+  from = "/*"
+  to = "/200.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
