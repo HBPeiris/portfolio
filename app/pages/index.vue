@@ -152,7 +152,7 @@
     </section>
 
     <!-- Contact Section -->
-    <section class="relative w-full min-h-screen bg-black py-20 flex items-center justify-center">
+    <section id="contact" class="relative w-full min-h-screen bg-black py-20 flex items-center justify-center">
       <div class="w-full">
         <ContactForm />
       </div>
@@ -189,7 +189,7 @@ const skillsSection = ref<HTMLElement | null>(null);
 const myNavLinks: NavLink[] = [
   { label: 'LinkedIn', to: 'https://www.linkedin.com/in/himeth-peiris-1ab2232b3', isExternal: true },
   { label: 'GitHub', to: 'https://github.com/HBPeiris', isExternal: true },
-  { label: 'Contact', to: 'mailto:himeth@example.com' }
+  { label: 'Contact', to: '#contact' }
 ];
 
 // Skills data for FlowingMenu

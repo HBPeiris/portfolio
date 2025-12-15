@@ -32,9 +32,10 @@
           GitHub
         </a>
         <a 
-          href="mailto:himeth@example.com" 
+          href="#contact" 
           class="footer-link"
-        >
+          @click.prevent="scrollToContact"
+          >
           <svg class="link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
           </svg>
@@ -55,6 +56,16 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+
+const scrollToContact =()=>{
+  const element = document.getElementById('contact');
+  if(element){
+    element.scrollIntoView({
+      behavior:'smooth',
+      block:'start'
+    })
+  }
+}
 
 const currentYear = computed(() => new Date().getFullYear());
 </script>
