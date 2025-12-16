@@ -58,7 +58,7 @@
 
 <script>
 import emailjs from '@emailjs/browser';
-import { emailjsConfig } from '~/config/emailjs';
+import { emailjsConfig } from '@/config/emailjs';
 
 export default {
   name: 'ContactForm',
