@@ -74,25 +74,44 @@ export default {
     };
   },
   mounted() {
-    // Initialize EmailJS with your public key
-    emailjs.init('kX_m-07Vb96hI1hMm');
+    // Initialize EmailJS with public key from environment variable
+    const publicKey = this.$config.public.emailjsPublicKey;
+    if (publicKey) {
+      emailjs.init(publicKey);
+    } else {
+      console.error('EmailJS public key not found in environment variables');
+    }
   },
   methods: {
     async sendEmail() {
       this.isLoading = true;
       this.statusMessage = '';
 
+      // Get environment variables
+      const serviceId = this.$config.public.emailjsServiceId;
+      const templateId = this.$config.public.emailjsTemplateId;
+      const publicKey = this.$config.public.emailjsPublicKey;
+
+      // Validate environment variables
+      if (!serviceId || !templateId || !publicKey) {
+        this.statusMessage = 'Email configuration is missing. Please contact the administrator.';
+        this.statusClass = 'error';
+        this.isLoading = false;
+        return;
+      }
+
       try {
         const result = await emailjs.send(
-          'service_8z6dlb6',
-          'template_octor7d',
+          serviceId,
+          templateId,
           {
+            to_name: 'Himeth',
             from_name: this.form.name,
             from_email: this.form.email,
             message: this.form.message,
-            to_email: 'himethpeiris6@gmail.com'
+            reply_to: this.form.email
           },
-          'kX_m-07Vb96hI1hMm'
+          publicKey
         );
 
         console.log('Email sent successfully:', result);
