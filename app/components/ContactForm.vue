@@ -78,16 +78,18 @@ export default {
       this.isLoading = true;
       this.statusMessage = '';
 
+      const config = useRuntimeConfig();
+      
       try {
         const result = await emailjs.send(
-          'service_8z6dlb6',
-          'template_octor7d',
+          config.public.emailjs.serviceId,
+          config.public.emailjs.templateId,
           {
             from_name: this.form.name,
             from_email: this.form.email,
             message: this.form.message
           },
-          'kX_m-07Vb96hI1hMm'
+          config.public.emailjs.publicKey
         );
 
         this.statusMessage = 'Message sent successfully!';
