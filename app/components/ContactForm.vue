@@ -73,33 +73,49 @@ export default {
       statusClass: ''
     };
   },
+  mounted() {
+    // Initialize EmailJS with your public key
+    emailjs.init('kX_m-07Vb96hI1hMm');
+  },
   methods: {
     async sendEmail() {
       this.isLoading = true;
       this.statusMessage = '';
 
-      const config = useRuntimeConfig();
-      
       try {
         const result = await emailjs.send(
-          config.public.emailjs.serviceId,
-          config.public.emailjs.templateId,
+          'service_8z6dlb6',
+          'template_octor7d',
           {
             from_name: this.form.name,
             from_email: this.form.email,
-            message: this.form.message
+            message: this.form.message,
+            to_email: 'himethpeiris6@gmail.com'
           },
-          config.public.emailjs.publicKey
+          'kX_m-07Vb96hI1hMm'
         );
 
-        this.statusMessage = 'Message sent successfully!';
+        console.log('Email sent successfully:', result);
+        this.statusMessage = 'Message sent successfully! I\'ll get back to you soon.';
         this.statusClass = 'success';
+        
+        // Clear form
         this.form = { name: '', email: '', message: '' };
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+          this.statusMessage = '';
+        }, 5000);
         
       } catch (error) {
         console.error('Email send failed:', error);
-        this.statusMessage = 'Failed to send message. Please try again.';
+        this.statusMessage = 'Failed to send message. Please try again or email me directly.';
         this.statusClass = 'error';
+        
+        // Clear error message after 5 seconds
+        setTimeout(() => {
+          this.statusMessage = '';
+        }, 5000);
       } finally {
         this.isLoading = false;
       }
@@ -134,13 +150,6 @@ export default {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-align: left;
-}
-
-.subtitle {
-  font-size: 1.125rem;
-  color: rgba(255, 255, 255, 0.5);
-  font-weight: 300;
-  letter-spacing: 0.02em;
 }
 
 .form-group {
@@ -322,12 +331,8 @@ textarea {
     padding: 3rem 1.5rem;
   }
 
-  .contact-header h2 {
-    font-size: 2.5rem;
-  }
-
-  .subtitle {
-    font-size: 1rem;
+  .contact-header h3 {
+    font-size: 1.75rem;
   }
 }
 </style>
