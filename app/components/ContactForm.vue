@@ -105,11 +105,11 @@ export default {
           serviceId,
           templateId,
           {
-            to_name: 'Himeth',
-            from_name: this.form.name,
-            from_email: this.form.email,
+            name: this.form.name,
+            email: this.form.email,
             message: this.form.message,
-            reply_to: this.form.email
+            from_name: this.form.name,
+            from_email: this.form.email
           },
           publicKey
         );
