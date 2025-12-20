@@ -1,7 +1,7 @@
 <template>
-  <div class="flex h-[500px] w-96 items-center justify-center overflow-visible">
+  <div class="flex h-[350px] w-[280px] sm:h-[450px] sm:w-[320px] lg:h-[500px] lg:w-96 items-center justify-center overflow-visible">
     <div 
-      class="relative h-[450px] w-80 cursor-pointer transition-transform duration-300 hover:scale-105"
+      class="relative h-[320px] w-[250px] sm:h-[420px] sm:w-[290px] lg:h-[450px] lg:w-80 cursor-pointer transition-transform duration-300 hover:scale-105"
       @click="$emit('click')"
     >
       
@@ -32,7 +32,7 @@
       
       <!-- Cover Content Layer -->
       <div
-        class="absolute inset-0 h-full w-full rounded-xl border-[6px] border-white bg-white transition-all duration-700 ease-[cubic-bezier(.405,0,.025,1)] shadow-2xl"
+        class="absolute inset-0 h-full w-full rounded-xl border-4 sm:border-[6px] border-white bg-white transition-all duration-700 ease-[cubic-bezier(.405,0,.025,1)] shadow-2xl"
         :style="{
           transform: isFlipped 
             ? `perspective(400px) rotateY(${factor * 180}deg)` 
@@ -65,3 +65,7 @@ defineEmits(['click']);
 const tiltLeft = computed(() => props.direction === 'left');
 const factor = computed(() => tiltLeft.value ? 1 : -1);
 </script>
+
+<style scoped>
+/* No custom styles needed - using Tailwind utilities */
+</style>

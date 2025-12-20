@@ -151,6 +151,7 @@ export default {
   margin: 0 auto;
   padding: 4rem 2rem;
   font-family: 'Inter', sans-serif;
+  width: 100%;
 }
 
 .contact-header {
@@ -159,7 +160,7 @@ export default {
 }
 
 .contact-header h3 {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: 700;
   color: white;
   margin-bottom: 0.5rem;
@@ -169,10 +170,11 @@ export default {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-align: left;
+  line-height: 1.2;
 }
 
 .form-group {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   position: relative;
 }
 
@@ -180,7 +182,7 @@ label {
   display: block;
   margin-bottom: 0.75rem;
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
   color: rgba(255, 255, 255, 0.9);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -190,15 +192,16 @@ label {
 input,
 textarea {
   width: 100%;
-  padding: 1rem 1.25rem;
+  padding: 0.875rem 1rem;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  font-size: 1rem;
+  font-size: clamp(0.875rem, 2vw, 1rem);
   color: white;
   font-family: 'Inter', sans-serif;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  box-sizing: border-box;
 }
 
 input::placeholder,
@@ -222,18 +225,18 @@ textarea:focus + label {
 
 textarea {
   resize: vertical;
-  min-height: 140px;
+  min-height: 120px;
   line-height: 1.6;
 }
 
 .submit-btn {
   width: 100%;
-  padding: 1.25rem 2rem;
+  padding: 1rem 2rem;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   color: white;
-  font-size: 1rem;
+  font-size: clamp(0.875rem, 2vw, 1rem);
   font-weight: 600;
   letter-spacing: 0.05em;
   cursor: pointer;
@@ -311,7 +314,7 @@ textarea {
   margin-top: 1.5rem;
   padding: 1rem 1.25rem;
   border-radius: 12px;
-  font-size: 0.9375rem;
+  font-size: clamp(0.8125rem, 2vw, 0.9375rem);
   font-weight: 500;
   text-align: center;
   backdrop-filter: blur(10px);
@@ -347,11 +350,47 @@ textarea {
 /* Responsive Design */
 @media (max-width: 640px) {
   .contact-form {
-    padding: 3rem 1.5rem;
+    padding: 2.5rem 1.25rem;
+  }
+
+  .contact-header {
+    margin-bottom: 2rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  input,
+  textarea {
+    padding: 0.75rem 0.875rem;
+  }
+
+  textarea {
+    min-height: 100px;
+  }
+
+  .submit-btn {
+    padding: 0.875rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-form {
+    padding: 2rem 1rem;
   }
 
   .contact-header h3 {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
+  }
+}
+
+/* Improve touch targets for mobile */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  .submit-btn {
+    min-height: 44px; /* iOS recommended touch target size */
   }
 }
 </style>

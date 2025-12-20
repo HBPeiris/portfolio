@@ -195,7 +195,7 @@ const myNavLinks: NavLink[] = [
 // Skills data for FlowingMenu
 const skillItems = [
   { 
-    link: '#', 
+    link: '#skillsSection', 
     text: 'Web Development', 
     image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
     skills: [
@@ -209,7 +209,7 @@ const skillItems = [
     ]
   },
   { 
-    link: '#', 
+    link: '#skillsSection', 
     text: 'Database', 
     image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
     skills: [
@@ -220,7 +220,7 @@ const skillItems = [
     ]
   },
   { 
-    link: '#', 
+    link: '#skillsSection', 
     text: 'UI Design', 
     image: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg',
     skills: [
@@ -229,7 +229,7 @@ const skillItems = [
     ]
   },
   { 
-    link: '#', 
+    link: '#skillsSection', 
     text: 'Project Management', 
     image: 'https://api.iconify.design/simple-icons:clickup.svg?color=%237b68ee',
     skills: [

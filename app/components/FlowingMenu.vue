@@ -8,22 +8,22 @@
         :ref="el => setItemRef(el as HTMLDivElement, idx)"
       >
         <a
-          class="flex items-center justify-center h-full relative cursor-pointer uppercase no-underline font-semibold text-white text-[4vh] hover:text-[#0b0b0b] focus:text-white focus-visible:text-[#0b0b0b]"
+          class="flex items-center justify-center h-full relative cursor-pointer uppercase no-underline font-semibold text-white hover:text-[#0b0b0b] focus:text-white focus-visible:text-[#0b0b0b] text-[2.5vh] sm:text-[3vh] lg:text-[4vh] px-2 sm:px-4"
           :href="item.link"
           @mouseenter="ev => handleMouseEnter(ev, idx)"
           @mouseleave="ev => handleMouseLeave(ev, idx)"
         >
-          {{ item.text }}
+          <span class="text-center leading-tight">{{ item.text }}</span>
         </a>
 
         <div
           class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none bg-white translate-y-[101%]"
           :ref="el => (marqueeRefs[idx] = el as HTMLDivElement)"
         >
-          <div class="h-full w-full flex items-center justify-center" :ref="el => (marqueeInnerRefs[idx] = el as HTMLDivElement)">
-            <div class="flex items-center gap-8">
+          <div class="h-full w-full flex items-center justify-center px-2 sm:px-4" :ref="el => (marqueeInnerRefs[idx] = el as HTMLDivElement)">
+            <div class="flex items-center gap-4 sm:gap-6 lg:gap-8">
               <template v-for="(skill, skillIdx) in item.skills" :key="`${idx}-${skillIdx}`">
-                <div class="w-16 h-16 p-2 flex items-center justify-center">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 p-1 sm:p-2 flex items-center justify-center flex-shrink-0">
                   <img 
                     :src="skill.logo" 
                     :alt="skill.name"
@@ -116,5 +116,22 @@ const handleMouseLeave = (ev: MouseEvent, idx: number) => {
 </script>
 
 <style scoped>
-/* Removed marquee animation completely */
+/* Responsive text wrapping */
+a span {
+  word-break: break-word;
+  hyphens: auto;
+}
+
+@media (max-width: 640px) {
+  a {
+    font-size: 2.5vh;
+    line-height: 1.2;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  a {
+    font-size: 3vh;
+  }
+}
 </style>
