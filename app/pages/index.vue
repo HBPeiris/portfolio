@@ -152,7 +152,7 @@
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="relative w-full min-h-screen bg-black py-20 flex items-center justify-center">
+    <section id="contact" class="relative w-full min-h-screen bg-black flex items-center justify-center">
       <div class="w-full">
         <ContactForm />
       </div>

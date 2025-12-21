@@ -56,91 +56,105 @@
   </div>
 </template>
 
-<script>
-import emailjs from '@emailjs/browser';
+<script setup>
+import { ref, onMounted } from 'vue'
+import emailjs from '@emailjs/browser'
 
-export default {
-  name: 'ContactForm',
-  data() {
-    return {
-      form: {
-        name: '',
-        email: '',
-        message: ''
-      },
-      isLoading: false,
-      statusMessage: '',
-      statusClass: ''
-    };
-  },
-  mounted() {
-    // Initialize EmailJS with public key from environment variable
-    const publicKey = this.$config.public.emailjsPublicKey;
-    if (publicKey) {
-      emailjs.init(publicKey);
-    } else {
-      console.error('EmailJS public key not found in environment variables');
-    }
-  },
-  methods: {
-    async sendEmail() {
-      this.isLoading = true;
-      this.statusMessage = '';
+// Get runtime config
+const config = useRuntimeConfig()
 
-      // Get environment variables
-      const serviceId = this.$config.public.emailjsServiceId;
-      const templateId = this.$config.public.emailjsTemplateId;
-      const publicKey = this.$config.public.emailjsPublicKey;
+// Reactive state
+const form = ref({
+  name: '',
+  email: '',
+  message: ''
+})
 
-      // Validate environment variables
-      if (!serviceId || !templateId || !publicKey) {
-        this.statusMessage = 'Email configuration is missing. Please contact the administrator.';
-        this.statusClass = 'error';
-        this.isLoading = false;
-        return;
-      }
+const isLoading = ref(false)
+const statusMessage = ref('')
+const statusClass = ref('')
 
-      try {
-        const result = await emailjs.send(
-          serviceId,
-          templateId,
-          {
-            name: this.form.name,
-            email: this.form.email,
-            message: this.form.message,
-            from_name: this.form.name,
-            from_email: this.form.email
-          },
-          publicKey
-        );
-
-        console.log('Email sent successfully:', result);
-        this.statusMessage = 'Message sent successfully! I\'ll get back to you soon.';
-        this.statusClass = 'success';
-        
-        // Clear form
-        this.form = { name: '', email: '', message: '' };
-        
-        // Clear success message after 5 seconds
-        setTimeout(() => {
-          this.statusMessage = '';
-        }, 5000);
-        
-      } catch (error) {
-        console.error('Email send failed:', error);
-        this.statusMessage = 'Failed to send message. Please try again or email me directly.';
-        this.statusClass = 'error';
-        
-        // Clear error message after 5 seconds
-        setTimeout(() => {
-          this.statusMessage = '';
-        }, 5000);
-      } finally {
-        this.isLoading = false;
-      }
-    }
+// Initialize EmailJS on mount
+onMounted(() => {
+  const publicKey = config.public.emailjsPublicKey
+  
+  // Debug: Log to verify env variables are loaded
+  console.log('EmailJS Config Check:')
+  console.log('Service ID:', config.public.emailjsServiceId ? '✓ Loaded' : '✗ Missing')
+  console.log('Template ID:', config.public.emailjsTemplateId ? '✓ Loaded' : '✗ Missing')
+  console.log('Public Key:', config.public.emailjsPublicKey ? '✓ Loaded' : '✗ Missing')
+  
+  if (publicKey) {
+    emailjs.init(publicKey)
+    console.log('✓ EmailJS initialized successfully')
+  } else {
+    console.error('✗ EmailJS public key not found in environment variables')
   }
-};
+})
+
+// Send email function
+const sendEmail = async () => {
+  isLoading.value = true
+  statusMessage.value = ''
+
+  // Get environment variables
+  const serviceId = config.public.emailjsServiceId
+  const templateId = config.public.emailjsTemplateId
+  const publicKey = config.public.emailjsPublicKey
+
+  // Validate environment variables
+  if (!serviceId || !templateId || !publicKey) {
+    statusMessage.value = 'Email configuration is missing. Please contact the administrator.'
+    statusClass.value = 'error'
+    isLoading.value = false
+    console.error('Missing EmailJS configuration:', {
+      serviceId: !!serviceId,
+      templateId: !!templateId,
+      publicKey: !!publicKey
+    })
+    return
+  }
+
+  try {
+    const result = await emailjs.send(
+      serviceId,
+      templateId,
+      {
+        from_name: form.value.name,
+        from_email: form.value.email,
+        message: form.value.message,
+        // Optional: Add these if your template uses them
+        name: form.value.name,
+        email: form.value.email
+      },
+      publicKey
+    )
+
+    console.log('✓ Email sent successfully:', result)
+    statusMessage.value = "Message sent successfully! I'll get back to you soon."
+    statusClass.value = 'success'
+    
+    // Clear form
+    form.value = { name: '', email: '', message: '' }
+    
+    // Clear success message after 5 seconds
+    setTimeout(() => {
+      statusMessage.value = ''
+    }, 5000)
+    
+  } catch (error) {
+    console.error('✗ Email send failed:', error)
+    statusMessage.value = 'Failed to send message. Please try again or email me directly.'
+    statusClass.value = 'error'
+    
+    // Clear error message after 5 seconds
+    setTimeout(() => {
+      statusMessage.value = ''
+    }, 5000)
+  } finally {
+    isLoading.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -149,14 +163,15 @@ export default {
 .contact-form {
   max-width: 600px;
   margin: 0 auto;
-  padding: 4rem 2rem;
+  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 4vw, 2rem);
   font-family: 'Inter', sans-serif;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .contact-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: clamp(2rem, 5vw, 3rem);
 }
 
 .contact-header h3 {
@@ -174,7 +189,7 @@ export default {
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(1.25rem, 3vw, 1.5rem);
   position: relative;
 }
 
@@ -192,10 +207,10 @@ label {
 input,
 textarea {
   width: 100%;
-  padding: 0.875rem 1rem;
+  padding: clamp(0.75rem, 2vw, 0.875rem) clamp(0.875rem, 2.5vw, 1rem);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border-radius: clamp(8px, 2vw, 12px);
   font-size: clamp(0.875rem, 2vw, 1rem);
   color: white;
   font-family: 'Inter', sans-serif;
@@ -225,16 +240,16 @@ textarea:focus + label {
 
 textarea {
   resize: vertical;
-  min-height: 120px;
+  min-height: clamp(100px, 20vw, 120px);
   line-height: 1.6;
 }
 
 .submit-btn {
   width: 100%;
-  padding: 1rem 2rem;
+  padding: clamp(0.875rem, 2.5vw, 1rem) clamp(1.5rem, 4vw, 2rem);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border-radius: clamp(8px, 2vw, 12px);
   color: white;
   font-size: clamp(0.875rem, 2vw, 1rem);
   font-weight: 600;
@@ -311,9 +326,9 @@ textarea {
 }
 
 .status-message {
-  margin-top: 1.5rem;
-  padding: 1rem 1.25rem;
-  border-radius: 12px;
+  margin-top: clamp(1.25rem, 3vw, 1.5rem);
+  padding: clamp(0.875rem, 2vw, 1rem) clamp(1rem, 2.5vw, 1.25rem);
+  border-radius: clamp(8px, 2vw, 12px);
   font-size: clamp(0.8125rem, 2vw, 0.9375rem);
   font-weight: 500;
   text-align: center;
@@ -390,7 +405,55 @@ textarea {
   input,
   textarea,
   .submit-btn {
-    min-height: 44px; /* iOS recommended touch target size */
+    min-height: 44px;
+  }
+}
+
+/* Landscape mobile devices */
+@media (max-width: 896px) and (orientation: landscape) {
+  .contact-form {
+    padding: 1.5rem 1rem;
+  }
+
+  .contact-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  textarea {
+    min-height: 80px;
+  }
+}
+
+/* Large tablets and small desktops */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .contact-form {
+    padding: 3rem 1.5rem;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 360px) {
+  .contact-header h3 {
+    font-size: 1.25rem;
+  }
+
+  label {
+    font-size: 0.75rem;
+  }
+
+  input,
+  textarea {
+    font-size: 0.875rem;
+    padding: 0.625rem 0.75rem;
+  }
+
+  .submit-btn {
+    font-size: 0.875rem;
+    padding: 0.75rem 1.25rem;
   }
 }
 </style>

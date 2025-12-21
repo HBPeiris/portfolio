@@ -1,7 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@nuxtjs/tailwindcss','@nuxtjs/google-fonts'],
-
+  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/google-fonts'],
 
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -16,13 +15,15 @@ export default defineNuxtConfig({
       ],
       link: [
         {
-          rel: "stylesheet",
-          href: "https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700&display=swap"
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700&display=swap'
         }
       ]
     }
   },
-   runtimeConfig: {
+
+  runtimeConfig: {
+    // Public keys (exposed to client-side)
     public: {
       emailjsServiceId: process.env.NUXT_PUBLIC_EMAILJS_SERVICE_ID,
       emailjsTemplateId: process.env.NUXT_PUBLIC_EMAILJS_TEMPLATE_ID,

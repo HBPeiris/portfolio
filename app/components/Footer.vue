@@ -182,8 +182,9 @@ const currentYear = computed(() => new Date().getFullYear());
   }
 
   .footer-links {
-    flex-direction: column;
-    gap: 1rem;
+    flex-direction: row;
+    gap: 1.5rem;
+    justify-content: space-between;
   }
 
   .footer-copyright {
