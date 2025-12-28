@@ -8,10 +8,10 @@
       </div>
     </div>
 
-    <!-- Stylish title -->
-    <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-8xl font-bold mb-4 sm:mb-6 leading-tight">
-      <span class="text-white">
-        ABOUT ME
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
+     Let's<br/>
+      <span class="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        CONNECT
       </span>
     </h1>
     
