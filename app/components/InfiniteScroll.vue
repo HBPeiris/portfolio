@@ -9,7 +9,7 @@
       }"
     >
       <div
-        class="infinite-scroll-container flex flex-col px-4 cursor-grab active:cursor-grabbing"
+        class="infinite-scroll-container flex flex-col px-2 md:px-4 cursor-grab active:cursor-grabbing"
         ref="containerRef"
         :style="{
           transform: getTiltTransform(),
@@ -22,9 +22,9 @@
         <div
           v-for="(item, index) in items"
           :key="index"
-          class="infinite-scroll-item rounded-3xl flex items-center justify-center text-xl font-semibold text-center select-none box-border relative"
+          class="infinite-scroll-item rounded-xl md:rounded-3xl flex items-center justify-center text-xl font-semibold text-center select-none box-border relative"
           :style="{
-            height: itemMinHeight + 'px',
+            height: getItemHeight(),
             marginTop: negativeMargin
           }"
           v-html="item.content.template"
@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import gsap from 'gsap';
 
 interface InfiniteScrollItem {
@@ -75,11 +75,22 @@ const props = withDefaults(defineProps<Props>(), {
 
 const wrapperRef = ref<HTMLDivElement | null>(null);
 const containerRef = ref<HTMLDivElement | null>(null);
+const isMobile = ref(false);
 let observer: any = null;
 let rafId: number | null = null;
 let velocity = 0;
 let stopTicker: (() => void) | null = null;
 let startTicker: (() => void) | null = null;
+
+// Check if mobile device
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < 768;
+};
+
+// Responsive item height - smaller on mobile
+const getItemHeight = () => {
+  return isMobile.value ? '120px' : `${props.itemMinHeight}px`;
+};
 
 const getTiltTransform = (): string => {
   if (!props.isTilted) return 'none';
@@ -118,6 +129,10 @@ const initializeScroll = async () => {
     gsap.set(child, { y });
   });
 
+  // ENHANCED SCROLL SENSITIVITY - Much easier to scroll
+  const scrollMultiplier = isMobile.value ? 4.5 : 2.5;
+  const dragMultiplier = isMobile.value ? 5 : 6;
+
   observer = Observer.create({
     target: container,
     type: 'wheel,touch,pointer',
@@ -138,10 +153,10 @@ const initializeScroll = async () => {
         }
       }
       if (Math.abs(velocity) > 0.1) {
-        const momentum = velocity * 0.8;
+        const momentum = velocity * (isMobile.value ? 0.7 : 0.8);
         divItems.forEach(child => {
           gsap.to(child, {
-            duration: 1.5,
+            duration: isMobile.value ? 1.2 : 1.5,
             ease: 'power2.out',
             y: `+=${momentum}`,
             modifiers: {
@@ -154,13 +169,13 @@ const initializeScroll = async () => {
     },
     onChange: ({ deltaY = 0, isDragging = false, event }: any) => {
       const d = event.type === 'wheel' ? -deltaY : deltaY;
-      const distance = isDragging ? d * 5 : d * 1.5;
+      const distance = isDragging ? d * dragMultiplier : d * scrollMultiplier;
 
       velocity = distance * 0.5;
 
       divItems.forEach(child => {
         gsap.to(child, {
-          duration: isDragging ? 0.3 : 1.2,
+          duration: isDragging ? (isMobile.value ? 0.25 : 0.3) : (isMobile.value ? 0.9 : 1.2),
           ease: isDragging ? 'power1.out' : 'power3.out',
           y: `+=${distance}`,
           modifiers: {
@@ -205,6 +220,12 @@ const initializeScroll = async () => {
 
       container.addEventListener('mouseenter', stopTicker);
       container.addEventListener('mouseleave', startTicker);
+      
+      // Add touch events for mobile
+      if (isMobile.value) {
+        container.addEventListener('touchstart', stopTicker, { passive: true });
+        container.addEventListener('touchend', startTicker, { passive: true });
+      }
     }
   }
 };
@@ -225,19 +246,34 @@ const cleanup = () => {
   if (container && props.pauseOnHover && stopTicker && startTicker) {
     container.removeEventListener('mouseenter', stopTicker);
     container.removeEventListener('mouseleave', startTicker);
+    container.removeEventListener('touchstart', stopTicker);
+    container.removeEventListener('touchend', startTicker);
   }
 
   stopTicker = null;
   startTicker = null;
 };
 
+// Handle window resize
+const handleResize = () => {
+  checkMobile();
+  cleanup();
+  setTimeout(() => {
+    initializeScroll();
+  }, 100);
+};
+
 onMounted(() => {
+  checkMobile();
+  window.addEventListener('resize', handleResize);
+  
   setTimeout(() => {
     initializeScroll();
   }, 100);
 });
 
 onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
   cleanup();
 });
 
@@ -262,12 +298,17 @@ watch(
 </script>
 
 <style scoped>
+.infinite-scroll-wrapper {
+  touch-action: none;
+  -webkit-overflow-scrolling: touch;
+}
+
 .infinite-scroll-wrapper::before,
 .infinite-scroll-wrapper::after {
   content: '';
   position: absolute;
   background: linear-gradient(var(--dir, to bottom), transparent, transparent);
-  height: 30%;
+  height: 25%;
   width: 100%;
   z-index: 1;
   pointer-events: none;
@@ -296,5 +337,28 @@ watch(
   -moz-backface-visibility: hidden;
   -ms-backface-visibility: hidden;
   transform: translateZ(0);
+}
+
+/* Mobile optimizations - Better scrolling */
+@media (max-width: 768px) {
+  .infinite-scroll-container {
+    touch-action: pan-y;
+  }
+  
+  .infinite-scroll-wrapper::before,
+  .infinite-scroll-wrapper::after {
+    height: 20%;
+  }
+}
+
+/* Improve scroll performance on mobile */
+@media (hover: none) and (pointer: coarse) {
+  .infinite-scroll-container {
+    cursor: default !important;
+  }
+  
+  .infinite-scroll-container.active {
+    cursor: default !important;
+  }
 }
 </style>

@@ -40,8 +40,8 @@
       </Transition>
 
       <!-- Fixed Layout Container -->
-      <div class="h-screen flex items-center justify-center p-8 relative" style="z-index: 1;">
-        <div class="max-w-6xl w-full flex flex-col lg:flex-row items-center justify-between gap-16">
+      <div class="h-screen flex items-center justify-center p-4 sm:p-8 relative" style="z-index: 1;">
+        <div class="max-w-6xl w-full flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-12 lg:gap-16">
           
           <!-- Left: Text Content (Changes based on mode) -->
           <HomeView v-if="!isAboutMode" />
@@ -115,30 +115,30 @@
     <!-- Projects Section with InfiniteScroll -->
     <section 
       ref="projectsSection"
-      class="relative w-full min-h-screen bg-black py-20 flex items-center justify-center overflow-hidden"
+      class="relative w-full min-h-screen bg-black py-20 md:py-32 flex items-center justify-center overflow-hidden"
     >
-      <div class="max-w-7xl mx-auto px-8 w-full relative z-10">
-        <!-- InfiniteScroll Component - Centered -->
+      <div class="max-w-7xl mx-auto px-4 md:px-8 w-full relative z-10">
+        <!-- InfiniteScroll Component - Centered with responsive sizing -->
         <div class="flex justify-center items-center">
           <InfiniteScroll
             :items="projectItems"
-            width="45rem"
-            max-height="85vh"
-            :item-min-height="200"
+            width="min(90vw, 45rem)"
+            max-height="50vh"
+            :item-min-height="150"
             :is-tilted="true"
             tilt-direction="left"
             :autoplay="true"
             :autoplay-speed="2.0"
             autoplay-direction="down"
             :pause-on-hover="true"
-            negative-margin="-1em"
+            negative-margin="-0.8em"
           />
         </div>
       </div>
 
       <!-- Stronger gradient overlays for fade effect -->
-      <div class="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-black via-black/80 to-transparent pointer-events-none z-20"></div>
-      <div class="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-20"></div>
+      <div class="absolute top-0 left-0 right-0 h-48 md:h-64 bg-gradient-to-b from-black via-black/80 to-transparent pointer-events-none z-20"></div>
+      <div class="absolute bottom-0 left-0 right-0 h-48 md:h-64 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-20"></div>
     </section>
 
     <!-- Skills Section with FlowingMenu -->
@@ -238,17 +238,16 @@ const skillItems = [
   }
 ];
 
-// Elegant black & white cards
+// Smaller, more compact cards for mobile
 const projectItems = [
   { 
     content: {
       template: `
-        <div class="w-full h-full bg-gradient-to-br from-white/5 to-white/10 rounded-2xl p-8 flex items-center justify-start shadow-[0_0_50px_rgba(255,255,255,0.03)] backdrop-blur-md border border-white/5 hover:border-white/20 hover:shadow-[0_0_80px_rgba(255,255,255,0.08)] transition-all duration-700 group relative overflow-hidden">
+        <div class="w-full h-full bg-gradient-to-br from-white/5 to-white/10 rounded-xl md:rounded-2xl p-4 md:p-8 flex items-center justify-start shadow-[0_0_50px_rgba(255,255,255,0.03)] backdrop-blur-md border border-white/5 hover:border-white/20 hover:shadow-[0_0_80px_rgba(255,255,255,0.08)] transition-all duration-700 group relative overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
           <div class="relative z-10 text-left">
-            <div class="text-6xl font-black text-white tracking-tight leading-none mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">2+</div>
-            <div class="text-3xl font-light text-white/70 tracking-wide" style="font-family: 'Inter', sans-serif;">YEARS</div>
-            <div class="text-xl font-light text-white/50 mt-1" style="font-family: 'Inter', sans-serif;">Experience</div>
+            <div class="text-4xl md:text-6xl font-black text-white tracking-tight leading-none mb-1 md:mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">2+ YEARS</div>
+            <div class="text-xl md:text-3xl font-light text-white/70 tracking-wide" style="font-family: 'Inter', sans-serif;">Experience</div>
           </div>
         </div>
       `
@@ -257,12 +256,11 @@ const projectItems = [
   { 
     content: {
       template: `
-        <div class="w-full h-full bg-gradient-to-br from-white/5 to-white/10 rounded-2xl p-8 flex items-center justify-start shadow-[0_0_50px_rgba(255,255,255,0.03)] backdrop-blur-md border border-white/5 hover:border-white/20 hover:shadow-[0_0_80px_rgba(255,255,255,0.08)] transition-all duration-700 group relative overflow-hidden">
+        <div class="w-full h-full bg-gradient-to-br from-white/5 to-white/10 rounded-xl md:rounded-2xl p-4 md:p-8 flex items-center justify-start shadow-[0_0_50px_rgba(255,255,255,0.03)] backdrop-blur-md border border-white/5 hover:border-white/20 hover:shadow-[0_0_80px_rgba(255,255,255,0.08)] transition-all duration-700 group relative overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
           <div class="relative z-10 text-left">
-            <div class="text-6xl font-black text-white tracking-tight leading-none mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">3+</div>
-            <div class="text-3xl font-light text-white/70 tracking-wide" style="font-family: 'Inter', sans-serif;">COMPLETED</div>
-            <div class="text-xl font-light text-white/50 mt-1" style="font-family: 'Inter', sans-serif;">Projects</div>
+            <div class="text-4xl md:text-6xl font-black text-white tracking-tight leading-none mb-1 md:mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">3+ COMPLETED</div>
+            <div class="text-xl md:text-3xl font-light text-white/70 tracking-wide" style="font-family: 'Inter', sans-serif;">Projects</div>
           </div>
         </div>
       `
@@ -271,11 +269,11 @@ const projectItems = [
   { 
     content: {
       template: `
-        <div class="w-full h-full bg-gradient-to-br from-white/5 to-white/10 rounded-2xl p-8 flex items-center justify-start shadow-[0_0_50px_rgba(255,255,255,0.03)] backdrop-blur-md border border-white/5 hover:border-white/20 hover:shadow-[0_0_80px_rgba(255,255,255,0.08)] transition-all duration-700 group relative overflow-hidden">
+        <div class="w-full h-full bg-gradient-to-br from-white/5 to-white/10 rounded-xl md:rounded-2xl p-4 md:p-8 flex items-center justify-start shadow-[0_0_50px_rgba(255,255,255,0.03)] backdrop-blur-md border border-white/5 hover:border-white/20 hover:shadow-[0_0_80px_rgba(255,255,255,0.08)] transition-all duration-700 group relative overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
           <div class="relative z-10 text-left">
-            <div class="text-6xl font-black text-white tracking-tight leading-none mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">CLEAN &</div>
-            <div class="text-3xl font-light text-white/70 tracking-wide" style="font-family: 'Inter', sans-serif;">MAINTAINABLE CODE</div>
+            <div class="text-3xl md:text-6xl font-black text-white tracking-tight leading-none mb-1 md:mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">CLEAN &</div>
+            <div class="text-xl md:text-3xl font-light text-white/70 tracking-wide" style="font-family: 'Inter', sans-serif;">MAINTAINABLE CODE</div>
           </div>
         </div>
       `
@@ -284,11 +282,11 @@ const projectItems = [
   { 
     content: {
       template: `
-        <div class="w-full h-full bg-gradient-to-br from-white/5 to-white/10 rounded-2xl p-8 flex items-center justify-start shadow-[0_0_50px_rgba(255,255,255,0.03)] backdrop-blur-md border border-white/5 hover:border-white/20 hover:shadow-[0_0_80px_rgba(255,255,255,0.08)] transition-all duration-700 group relative overflow-hidden">
+        <div class="w-full h-full bg-gradient-to-br from-white/5 to-white/10 rounded-xl md:rounded-2xl p-4 md:p-8 flex items-center justify-start shadow-[0_0_50px_rgba(255,255,255,0.03)] backdrop-blur-md border border-white/5 hover:border-white/20 hover:shadow-[0_0_80px_rgba(255,255,255,0.08)] transition-all duration-700 group relative overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
           <div class="relative z-10 text-left">
-            <div class="text-6xl font-black text-white tracking-tight leading-none mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">ATTENTION</div>
-            <div class="text-3xl font-light text-white/70 tracking-wide" style="font-family: 'Inter', sans-serif;">TO DETAIL</div>
+            <div class="text-3xl md:text-6xl font-black text-white tracking-tight leading-none mb-1 md:mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">ATTENTION</div>
+            <div class="text-xl md:text-3xl font-light text-white/70 tracking-wide" style="font-family: 'Inter', sans-serif;">TO DETAIL</div>
           </div>
         </div>
       `
@@ -297,11 +295,11 @@ const projectItems = [
   { 
     content: {
       template: `
-        <div class="w-full h-full bg-gradient-to-br from-white/5 to-white/10 rounded-2xl p-8 flex items-center justify-start shadow-[0_0_50px_rgba(255,255,255,0.03)] backdrop-blur-md border border-white/5 hover:border-white/20 hover:shadow-[0_0_80px_rgba(255,255,255,0.08)] transition-all duration-700 group relative overflow-hidden">
+        <div class="w-full h-full bg-gradient-to-br from-white/5 to-white/10 rounded-xl md:rounded-2xl p-4 md:p-8 flex items-center justify-start shadow-[0_0_50px_rgba(255,255,255,0.03)] backdrop-blur-md border border-white/5 hover:border-white/20 hover:shadow-[0_0_80px_rgba(255,255,255,0.08)] transition-all duration-700 group relative overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
           <div class="relative z-10 text-left">
-            <div class="text-6xl font-black text-white tracking-tight leading-none mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">WILLINGNESS</div>
-            <div class="text-3xl font-light text-white/70 tracking-wide" style="font-family: 'Inter', sans-serif;">TO LEARN & ADAPT</div>
+            <div class="text-3xl md:text-6xl font-black text-white tracking-tight leading-none mb-1 md:mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">WILLINGNESS</div>
+            <div class="text-xl md:text-3xl font-light text-white/70 tracking-wide" style="font-family: 'Inter', sans-serif;">TO LEARN & ADAPT</div>
           </div>
         </div>
       `
@@ -310,11 +308,11 @@ const projectItems = [
   { 
     content: {
       template: `
-        <div class="w-full h-full bg-gradient-to-br from-white/5 to-white/10 rounded-2xl p-8 flex items-center justify-start shadow-[0_0_50px_rgba(255,255,255,0.03)] backdrop-blur-md border border-white/5 hover:border-white/20 hover:shadow-[0_0_80px_rgba(255,255,255,0.08)] transition-all duration-700 group relative overflow-hidden">
+        <div class="w-full h-full bg-gradient-to-br from-white/5 to-white/10 rounded-xl md:rounded-2xl p-4 md:p-8 flex items-center justify-start shadow-[0_0_50px_rgba(255,255,255,0.03)] backdrop-blur-md border border-white/5 hover:border-white/20 hover:shadow-[0_0_80px_rgba(255,255,255,0.08)] transition-all duration-700 group relative overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
           <div class="relative z-10 text-left">
-            <div class="text-6xl font-black text-white tracking-tight leading-none mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">QUALITY</div>
-            <div class="text-3xl font-light text-white/70 tracking-wide" style="font-family: 'Inter', sans-serif;">DEVELOPMENT</div>
+            <div class="text-3xl md:text-6xl font-black text-white tracking-tight leading-none mb-1 md:mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">QUALITY</div>
+            <div class="text-xl md:text-3xl font-light text-white/70 tracking-wide" style="font-family: 'Inter', sans-serif;">DEVELOPMENT</div>
           </div>
         </div>
       `
