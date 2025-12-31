@@ -66,6 +66,3 @@ const tiltLeft = computed(() => props.direction === 'left');
 const factor = computed(() => tiltLeft.value ? 1 : -1);
 </script>
 
-<style scoped>
-/* No custom styles needed - using Tailwind utilities */
-</style>

@@ -73,27 +73,41 @@ const form = ref({
 const isLoading = ref(false)
 const statusMessage = ref('')
 const statusClass = ref('')
+const isInitialized = ref(false)
 
 // Initialize EmailJS on mount
 onMounted(() => {
-  const publicKey = config.public.emailjsPublicKey
-  
-  // Debug: Log to verify env variables are loaded
-  console.log('EmailJS Config Check:')
-  console.log('Service ID:', config.public.emailjsServiceId ? '✓ Loaded' : '✗ Missing')
-  console.log('Template ID:', config.public.emailjsTemplateId ? '✓ Loaded' : '✗ Missing')
-  console.log('Public Key:', config.public.emailjsPublicKey ? '✓ Loaded' : '✗ Missing')
-  
-  if (publicKey) {
-    emailjs.init(publicKey)
-    console.log('✓ EmailJS initialized successfully')
-  } else {
-    console.error('✗ EmailJS public key not found in environment variables')
+  try {
+    const publicKey = config.public.emailjsPublicKey
+    
+    // Debug: Log to verify env variables are loaded
+    console.log('EmailJS Config Check:')
+    console.log('Service ID:', config.public.emailjsServiceId ? '✓ Loaded' : '✗ Missing')
+    console.log('Template ID:', config.public.emailjsTemplateId ? '✓ Loaded' : '✗ Missing')
+    console.log('Public Key:', config.public.emailjsPublicKey ? '✓ Loaded' : '✗ Missing')
+    
+    if (publicKey) {
+      emailjs.init(publicKey)
+      isInitialized.value = true
+      console.log('✓ EmailJS initialized successfully')
+    } else {
+      console.error('✗ EmailJS public key not found in environment variables')
+      console.error('Expected variables: NUXT_PUBLIC_EMAILJS_SERVICE_ID, NUXT_PUBLIC_EMAILJS_TEMPLATE_ID, NUXT_PUBLIC_EMAILJS_PUBLIC_KEY')
+    }
+  } catch (error) {
+    console.error('✗ Error initializing EmailJS:', error)
   }
 })
 
 // Send email function
 const sendEmail = async () => {
+  // Check if EmailJS is initialized
+  if (!isInitialized.value) {
+    statusMessage.value = 'Email service is not configured. Please contact the administrator.'
+    statusClass.value = 'error'
+    return
+  }
+
   isLoading.value = true
   statusMessage.value = ''
 
@@ -115,18 +129,34 @@ const sendEmail = async () => {
     return
   }
 
+  // Validate form data
+  if (!form.value.name.trim() || !form.value.email.trim() || !form.value.message.trim()) {
+    statusMessage.value = 'Please fill in all fields.'
+    statusClass.value = 'error'
+    isLoading.value = false
+    return
+  }
+
   try {
+    // Prepare template parameters
+    const templateParams = {
+      from_name: form.value.name.trim(),
+      from_email: form.value.email.trim(),
+      message: form.value.message.trim(),
+      to_name: 'Portfolio Owner', // You can customize this
+      reply_to: form.value.email.trim()
+    }
+
+    console.log('Sending email with params:', {
+      serviceId,
+      templateId,
+      hasPublicKey: !!publicKey
+    })
+
     const result = await emailjs.send(
       serviceId,
       templateId,
-      {
-        from_name: form.value.name,
-        from_email: form.value.email,
-        message: form.value.message,
-        // Optional: Add these if your template uses them
-        name: form.value.name,
-        email: form.value.email
-      },
+      templateParams,
       publicKey
     )
 
@@ -144,13 +174,29 @@ const sendEmail = async () => {
     
   } catch (error) {
     console.error('✗ Email send failed:', error)
-    statusMessage.value = 'Failed to send message. Please try again or email me directly.'
+    
+    // Provide more specific error messages
+    let errorMessage = 'Failed to send message. '
+    
+    if (error.text) {
+      errorMessage += error.text
+    } else if (error.status === 400) {
+      errorMessage += 'Invalid request. Please check your EmailJS configuration.'
+    } else if (error.status === 401) {
+      errorMessage += 'Authentication failed. Please verify your EmailJS credentials.'
+    } else if (error.status === 404) {
+      errorMessage += 'Service or template not found. Please check your EmailJS IDs.'
+    } else {
+      errorMessage += 'Please try again or email me directly.'
+    }
+    
+    statusMessage.value = errorMessage
     statusClass.value = 'error'
     
-    // Clear error message after 5 seconds
+    // Clear error message after 8 seconds (longer for errors)
     setTimeout(() => {
       statusMessage.value = ''
-    }, 5000)
+    }, 8000)
   } finally {
     isLoading.value = false
   }
@@ -163,19 +209,26 @@ const sendEmail = async () => {
 .contact-form {
   max-width: 600px;
   margin: 0 auto;
-  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 4vw, 2rem);
+  padding: clamp(1.5rem, 4vw, 4rem) clamp(1rem, 3vw, 2rem);
   font-family: 'Inter', sans-serif;
   width: 100%;
   box-sizing: border-box;
 }
 
+@media (max-width: 768px) {
+  .contact-form {
+    max-width: 90%;
+    padding: 1.5rem 1rem;
+  }
+}
+
 .contact-header {
   text-align: center;
-  margin-bottom: clamp(2rem, 5vw, 3rem);
+  margin-bottom: clamp(1.5rem, 4vw, 3rem);
 }
 
 .contact-header h3 {
-  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-size: clamp(1.25rem, 3.5vw, 2rem);
   font-weight: 700;
   color: white;
   margin-bottom: 0.5rem;
@@ -188,9 +241,26 @@ const sendEmail = async () => {
   line-height: 1.2;
 }
 
+@media (max-width: 768px) {
+  .contact-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .contact-header h3 {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+}
+
 .form-group {
-  margin-bottom: clamp(1.25rem, 3vw, 1.5rem);
+  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
   position: relative;
+}
+
+@media (max-width: 768px) {
+  .form-group {
+    margin-bottom: 1rem;
+  }
 }
 
 label {
@@ -207,16 +277,25 @@ label {
 input,
 textarea {
   width: 100%;
-  padding: clamp(0.75rem, 2vw, 0.875rem) clamp(0.875rem, 2.5vw, 1rem);
+  padding: clamp(0.625rem, 1.5vw, 0.875rem) clamp(0.75rem, 2vw, 1rem);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: clamp(8px, 2vw, 12px);
-  font-size: clamp(0.875rem, 2vw, 1rem);
+  border-radius: clamp(6px, 1.5vw, 12px);
+  font-size: clamp(0.8125rem, 1.8vw, 1rem);
   color: white;
   font-family: 'Inter', sans-serif;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  input,
+  textarea {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 8px;
+  }
 }
 
 input::placeholder,
@@ -233,15 +312,16 @@ textarea:focus {
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
 }
 
-input:focus + label,
-textarea:focus + label {
-  color: white;
-}
-
 textarea {
   resize: vertical;
-  min-height: clamp(100px, 20vw, 120px);
+  min-height: clamp(80px, 15vw, 120px);
   line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  textarea {
+    min-height: 100px;
+  }
 }
 
 .submit-btn {
@@ -333,6 +413,7 @@ textarea {
   font-weight: 500;
   text-align: center;
   backdrop-filter: blur(10px);
+  line-height: 1.5;
 }
 
 .status-message.success {
@@ -365,38 +446,73 @@ textarea {
 /* Responsive Design */
 @media (max-width: 640px) {
   .contact-form {
-    padding: 2.5rem 1.25rem;
+    padding: 1.5rem 1rem;
+    max-width: 95%;
   }
 
   .contact-header {
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
   }
 
   .form-group {
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.875rem;
   }
 
   input,
   textarea {
-    padding: 0.75rem 0.875rem;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
   }
 
   textarea {
-    min-height: 100px;
+    min-height: 90px;
   }
 
   .submit-btn {
-    padding: 0.875rem 1.5rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  .status-message {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.8125rem;
   }
 }
 
 @media (max-width: 480px) {
   .contact-form {
-    padding: 2rem 1rem;
+    padding: 1.25rem 0.875rem;
+    max-width: 92%;
   }
 
   .contact-header h3 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
+  }
+
+  label {
+    font-size: 0.6875rem;
+    margin-bottom: 0.5rem;
+  }
+
+  input,
+  textarea {
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.625rem;
+  }
+
+  textarea {
+    min-height: 80px;
+  }
+
+  .submit-btn {
+    font-size: 0.8125rem;
+    padding: 0.625rem 1rem;
+  }
+
+  .status-message {
+    font-size: 0.75rem;
+    padding: 0.625rem 0.875rem;
   }
 }
 
@@ -437,23 +553,37 @@ textarea {
 
 /* Extra small devices */
 @media (max-width: 360px) {
+  .contact-form {
+    padding: 1rem 0.75rem;
+    max-width: 90%;
+  }
+
   .contact-header h3 {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
 
   label {
-    font-size: 0.75rem;
+    font-size: 0.625rem;
   }
 
   input,
   textarea {
-    font-size: 0.875rem;
-    padding: 0.625rem 0.75rem;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.625rem;
+  }
+
+  textarea {
+    min-height: 70px;
   }
 
   .submit-btn {
-    font-size: 0.875rem;
-    padding: 0.75rem 1.25rem;
+    font-size: 0.75rem;
+    padding: 0.625rem 1rem;
+  }
+
+  .status-message {
+    font-size: 0.6875rem;
+    padding: 0.5rem 0.75rem;
   }
 }
 </style>
