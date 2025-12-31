@@ -128,7 +128,7 @@
             :is-tilted="true"
             tilt-direction="left"
             :autoplay="true"
-            :autoplay-speed="2.0"
+            :autoplay-speed="1"
             autoplay-direction="down"
             :pause-on-hover="true"
             negative-margin="-0.8em"
