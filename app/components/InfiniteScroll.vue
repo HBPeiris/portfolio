@@ -57,6 +57,9 @@ interface Props {
   autoplaySpeed?: number;
   autoplayDirection?: 'down' | 'up';
   pauseOnHover?: boolean;
+  mobileMaxHeight?: string;
+  mobileWidth?: string;
+  mobileItemMinHeight?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -70,8 +73,12 @@ const props = withDefaults(defineProps<Props>(), {
   autoplay: false,
   autoplaySpeed: 1.5,
   autoplayDirection: 'down',
-  pauseOnHover: false
+  pauseOnHover: false,
+  mobileMaxHeight: '50vh',
+  mobileWidth: '90%',
+  mobileItemMinHeight: 100
 });
+
 
 const wrapperRef = ref<HTMLDivElement | null>(null);
 const containerRef = ref<HTMLDivElement | null>(null);
